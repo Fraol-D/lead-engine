@@ -1,70 +1,123 @@
-import { useEffect, useState } from 'react'
-import { generateMessage, updateLead } from '../api/leadsApi'
+import { useEffect, useRef, useState } from "react";
+import { generateMessage, updateLead } from "../api/leadsApi";
 
 export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
-  const [notes, setNotes] = useState(lead?.notes || '')
-  const [status, setStatus] = useState(lead?.status || 'cold')
-  const [message, setMessage] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [notes, setNotes] = useState(lead?.notes || "");
+  const [actionScore, setActionScore] = useState(lead?.actionScore || "Cold");
+  const [message, setMessage] = useState("");
+  const [copyState, setCopyState] = useState("idle");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const copyResetTimeoutRef = useRef(null);
+
+  const queueCopyStateReset = (nextState, durationMs) => {
+    if (copyResetTimeoutRef.current) {
+      clearTimeout(copyResetTimeoutRef.current);
+      copyResetTimeoutRef.current = null;
+    }
+
+    setCopyState(nextState);
+    copyResetTimeoutRef.current = setTimeout(() => {
+      setCopyState("idle");
+      copyResetTimeoutRef.current = null;
+    }, durationMs);
+  };
 
   useEffect(() => {
     if (lead) {
-      setNotes(lead.notes || '')
-      setStatus(lead.status || 'cold')
-      setMessage('')
+      setNotes(lead.notes || "");
+      setActionScore(lead.actionScore || "Cold");
+      setMessage("");
+      setCopyState("idle");
+
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+        copyResetTimeoutRef.current = null;
+      }
     }
-  }, [lead])
+  }, [lead]);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!lead) {
-    return null
+    return null;
   }
 
   const handleSave = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
-      const updatedLead = await updateLead(lead.id, { notes, status })
-      onLeadUpdated(updatedLead)
+      const updatedLead = await updateLead(lead.id, { notes, actionScore });
+      onLeadUpdated(updatedLead);
     } catch (error) {
-      console.error(error)
-      alert('Unable to save notes right now.')
+      console.error(error);
+      alert("Unable to save notes right now.");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
+
+  const markAsContacted = async () => {
+    try {
+      const updatedLead = await updateLead(lead.id, {
+        notes,
+        actionScore: "Contacted",
+      });
+      setActionScore("Contacted");
+      onLeadUpdated(updatedLead);
+    } catch (error) {
+      console.error(error);
+      alert("Unable to update right now.");
+    }
+  };
 
   const handleGenerateMessage = async () => {
-    setIsGenerating(true)
+    setIsGenerating(true);
     try {
-      const result = await generateMessage(lead.id)
-      setMessage(result.message)
+      const result = await generateMessage(lead.id);
+      setMessage(result.message);
+      setCopyState("idle");
+
+      if (copyResetTimeoutRef.current) {
+        clearTimeout(copyResetTimeoutRef.current);
+        copyResetTimeoutRef.current = null;
+      }
     } catch (error) {
-      console.error(error)
-      alert('Unable to generate message right now.')
+      console.error(error);
+      alert("Unable to generate message right now.");
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   const handleCopy = async () => {
     if (!message) {
-      return
+      return;
     }
 
     try {
-      await navigator.clipboard.writeText(message)
+      await navigator.clipboard.writeText(message);
+      queueCopyStateReset("copied", 1700);
     } catch (error) {
-      console.error(error)
-      alert('Copy failed. Please copy manually from the text area.')
+      console.error(error);
+      queueCopyStateReset("failed", 2200);
+      alert("Copy failed. Please copy manually from the text area.");
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/40 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-semibold text-slate-900">{lead.name}</h3>
+            <h3 className="text-xl font-semibold text-slate-900">
+              {lead.name}
+            </h3>
             <a
               href={lead.link}
               target="_blank"
@@ -83,42 +136,67 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
         </div>
 
         <div className="mt-4 grid gap-4 text-sm text-slate-700">
-          <p>{lead.description}</p>
-          <p>
-            <span className="font-semibold text-slate-900">Reason:</span> {lead.reason}
-          </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="rounded-lg bg-slate-50 p-4 border border-slate-100">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                The Reason
+              </span>
+              <p className="mt-1 font-medium text-slate-900">{lead.reason}</p>
+            </div>
+            <div className="rounded-lg bg-blue-50 p-4 border border-blue-100">
+              <span className="text-xs font-semibold uppercase tracking-wider text-blue-500">
+                Recommended Action
+              </span>
+              <p className="mt-1 font-medium text-blue-900">
+                {lead.nextAction}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2">
+              <span className="font-semibold text-slate-900">Action Score</span>
+              <select
+                value={actionScore}
+                onChange={(event) => setActionScore(event.target.value)}
+                className="rounded-md border border-slate-300 px-3 py-2 bg-white"
+              >
+                <option value="Hot">Hot</option>
+                <option value="Warm">Warm</option>
+                <option value="Cold">Cold</option>
+                <option value="Contacted">Contacted</option>
+              </select>
+            </label>
+          </div>
 
           <label className="grid gap-2">
-            <span className="font-semibold text-slate-900">Status</span>
-            <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2"
-            >
-              <option value="hot">Hot</option>
-              <option value="warm">Warm</option>
-              <option value="cold">Cold</option>
-            </select>
-          </label>
-
-          <label className="grid gap-2">
-            <span className="font-semibold text-slate-900">Notes</span>
+            <span className="font-semibold text-slate-900">
+              Notes & Context
+            </span>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              rows={4}
+              rows={3}
               className="rounded-md border border-slate-300 px-3 py-2"
-              placeholder="Write your outreach notes..."
+              placeholder="Add your research notes here..."
             />
           </label>
 
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="w-fit rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-          >
-            {isSaving ? 'Saving...' : 'Save Notes'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="w-fit rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            >
+              {isSaving ? "Saving..." : "Save Notes"}
+            </button>
+            <button
+              onClick={markAsContacted}
+              className="w-fit rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 border border-slate-300"
+            >
+              Mark as Contacted
+            </button>
+          </div>
 
           <div className="mt-2 border-t border-slate-200 pt-4">
             <h4 className="font-semibold text-slate-900">Message Generator</h4>
@@ -128,15 +206,37 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
                 disabled={isGenerating}
                 className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
               >
-                {isGenerating ? 'Generating...' : 'Generate Message'}
+                {isGenerating
+                  ? "Generating..."
+                  : message
+                    ? "Regenerate Message"
+                    : "Generate Message"}
               </button>
-              <button
-                onClick={handleCopy}
-                disabled={!message}
-                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              {message && (
+                <button
+                  onClick={handleCopy}
+                  className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                >
+                  {copyState === "copied" ? "Copied" : "Copy Message"}
+                </button>
+              )}
+            </div>
+            <div className="mt-2 h-7">
+              <p
+                className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-medium ring-1 transition-all duration-300 ${
+                  copyState === "idle"
+                    ? "pointer-events-none translate-y-1 opacity-0"
+                    : "translate-y-0 opacity-100"
+                } ${
+                  copyState === "copied"
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                    : "bg-red-50 text-red-700 ring-red-200"
+                }`}
               >
-                Copy Message
-              </button>
+                {copyState === "copied"
+                  ? "Message copied to clipboard"
+                  : "Copy failed, please try again"}
+              </p>
             </div>
             <textarea
               value={message}
@@ -149,5 +249,5 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
