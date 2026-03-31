@@ -1,27 +1,24 @@
 const cardStyles = [
-  'bg-white/95 border-slate-200',
-  'bg-orange-50 border-orange-200',
-  'bg-emerald-50 border-emerald-200',
-]
+  "col-span-12 md:col-span-5 bg-[#ffffff]",
+  "col-span-6 md:col-span-3 bg-[#f7ebe7]",
+  "col-span-6 md:col-span-4 bg-[#ece9e5]",
+];
 
 export default function SummaryCards({ summary }) {
   const cards = [
-    { label: 'Total leads', value: summary.total },
-    { label: 'Hot leads', value: summary.hot },
-    { label: 'Ready to contact', value: summary.readyToContact },
-  ]
+    { label: "Total Leads", value: summary.total },
+    { label: "Hot Leads", value: summary.hot },
+    { label: "Ready To Contact", value: summary.readyToContact },
+  ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="summary-grid">
       {cards.map((card, index) => (
-        <div
-          key={card.label}
-          className={`rounded-xl border p-4 shadow-sm ${cardStyles[index]}`}
-        >
-          <p className="text-sm text-slate-600">{card.label}</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-900">{card.value}</p>
+        <div key={card.label} className={`summary-card ${cardStyles[index]}`}>
+          <p className="summary-label">{card.label}</p>
+          <p className="summary-value">{card.value}</p>
         </div>
       ))}
     </div>
-  )
+  );
 }

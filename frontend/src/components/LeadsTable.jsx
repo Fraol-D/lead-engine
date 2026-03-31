@@ -1,11 +1,3 @@
-const statusStyles = {
-  Hot: "bg-red-100 text-red-700",
-  Warm: "bg-amber-100 text-amber-800",
-  Cold: "bg-slate-200 text-slate-700",
-  Hold: "bg-violet-100 text-violet-700",
-  Contacted: "bg-blue-100 text-blue-800",
-};
-
 const normalizeActionScore = (lead) => {
   const score = (lead?.actionScore || "").toLowerCase();
   if (score === "hot") return "Hot";
@@ -23,42 +15,50 @@ const normalizeActionScore = (lead) => {
 
 export default function LeadsTable({ leads, onSelectLead }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-sm">
+    <div className="table-shell overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-100 text-slate-700">
+        <table className="lead-table min-w-full">
+          <thead>
             <tr>
-              <th className="px-4 py-3 font-semibold">Name</th>
-              <th className="px-4 py-3 font-semibold">Platform</th>
-              <th className="px-4 py-3 font-semibold w-1/3">Reason</th>
-              <th className="px-4 py-3 font-semibold">Action Score</th>
-              <th className="px-4 py-3 font-semibold">Actions</th>
+              <th>Name</th>
+              <th>Platform</th>
+              <th className="w-[35%]">Reason</th>
+              <th>Action Score</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {leads.map((lead) => (
-              <tr key={lead.id} className="border-t border-slate-100 align-top">
-                <td className="px-4 py-3 font-medium text-slate-900">
+              <tr key={lead.id}>
+                <td>
                   <div className="flex flex-col">
-                    <span>{lead.name}</span>
-                    <span className="text-xs text-slate-500 font-normal">
+                    <span className="font-medium text-[#242322]">{lead.name}</span>
+                    <span className="text-xs text-[#706b67] font-normal">
                       {lead.niche}
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-slate-700">{lead.platform}</td>
-                <td className="px-4 py-3 text-slate-700">{lead.reason}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase ${statusStyles[normalizeActionScore(lead)] || statusStyles.Cold}`}
-                  >
+                <td className="text-[#57524f]">{lead.platform}</td>
+                <td className="text-[#3e3a37]">{lead.reason}</td>
+                <td>
+                  <span className={`score-pill ${
+                    normalizeActionScore(lead) === "Hot"
+                      ? "score-hot"
+                      : normalizeActionScore(lead) === "Warm"
+                        ? "score-warm"
+                        : normalizeActionScore(lead) === "Contacted"
+                          ? "score-contacted"
+                          : normalizeActionScore(lead) === "Hold"
+                            ? "score-hold"
+                            : "score-cold"
+                  }`}>
                     {normalizeActionScore(lead)}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                <td>
                   <button
                     onClick={() => onSelectLead(lead)}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+                    className="btn-secondary"
                   >
                     View
                   </button>

@@ -112,54 +112,53 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+      <div className="modal-shell">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-semibold text-slate-900">
+            <p className="kicker">Lead Profile</p>
+            <h3 className="text-2xl font-semibold text-[#22201f]">
               {lead.name}
             </h3>
             <a
               href={lead.link}
               target="_blank"
               rel="noreferrer"
-              className="text-sm text-blue-700 hover:underline"
+              className="text-sm text-[#72564c] hover:underline"
             >
               {lead.link}
             </a>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="btn-secondary"
           >
             Close
           </button>
         </div>
 
-        <div className="mt-4 grid gap-4 text-sm text-slate-700">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-lg bg-slate-50 p-4 border border-slate-100">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div className="mt-4 grid gap-4 text-sm text-[#3c3936]">
+          <div className="modal-grid">
+            <div className="ghost-block">
+              <span className="label-micro">
                 The Reason
               </span>
-              <p className="mt-1 font-medium text-slate-900">{lead.reason}</p>
+              <p className="value-copy">{lead.reason}</p>
             </div>
-            <div className="rounded-lg bg-blue-50 p-4 border border-blue-100">
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-500">
+            <div className="ghost-block bg-[#efe9e4]">
+              <span className="label-micro text-[#77584f]">
                 Recommended Action
               </span>
-              <p className="mt-1 font-medium text-blue-900">
-                {lead.nextAction}
-              </p>
+              <p className="value-copy">{lead.nextAction || "Follow and observe activity, then send a concise intro."}</p>
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2">
-              <span className="font-semibold text-slate-900">Action Score</span>
+              <span className="label-micro">Action Score</span>
               <select
                 value={actionScore}
                 onChange={(event) => setActionScore(event.target.value)}
-                className="rounded-md border border-slate-300 px-3 py-2 bg-white"
+                className="field-select"
               >
                 <option value="Hot">Hot</option>
                 <option value="Warm">Warm</option>
@@ -170,14 +169,14 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
           </div>
 
           <label className="grid gap-2">
-            <span className="font-semibold text-slate-900">
+            <span className="label-micro">
               Notes & Context
             </span>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
-              className="rounded-md border border-slate-300 px-3 py-2"
+              className="field-area"
               placeholder="Add your research notes here..."
             />
           </label>
@@ -186,25 +185,25 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-fit rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="btn-primary w-fit disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSaving ? "Saving..." : "Save Notes"}
             </button>
             <button
               onClick={markAsContacted}
-              className="w-fit rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 border border-slate-300"
+              className="btn-secondary"
             >
               Mark as Contacted
             </button>
           </div>
 
-          <div className="mt-2 border-t border-slate-200 pt-4">
-            <h4 className="font-semibold text-slate-900">Message Generator</h4>
+          <div className="mt-2 pt-4">
+            <h4 className="font-semibold text-[#2a2724]">Message Generator</h4>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 onClick={handleGenerateMessage}
                 disabled={isGenerating}
-                className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+                className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isGenerating
                   ? "Generating..."
@@ -215,7 +214,7 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
               {message && (
                 <button
                   onClick={handleCopy}
-                  className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className="btn-secondary"
                 >
                   {copyState === "copied" ? "Copied" : "Copy Message"}
                 </button>
@@ -242,7 +241,7 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               rows={7}
-              className="mt-3 w-full rounded-md border border-slate-300 px-3 py-2"
+              className="field-area mt-3"
               placeholder="Generated message appears here..."
             />
           </div>

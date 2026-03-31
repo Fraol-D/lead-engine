@@ -12,7 +12,12 @@ const actionScorePriority = ["Hot", "Warm", "Cold", "Contacted"];
 
 const normalizeLegacyScore = (lead) => {
   if (lead.actionScore) {
-    return normalizeScore(lead.actionScore);
+    const normalized = lead.actionScore.toString().toLowerCase();
+    if (normalized === "hot") return "Hot";
+    if (normalized === "warm") return "Warm";
+    if (normalized === "cold") return "Cold";
+    if (normalized === "contacted") return "Contacted";
+    return "Cold";
   }
 
   const legacyStatus = (lead.status || "").toLowerCase();
@@ -22,9 +27,45 @@ const normalizeLegacyScore = (lead) => {
   return "Cold";
 };
 
+const buildNextAction = (lead) => {
+  if (typeof lead.nextAction === "string" && lead.nextAction.trim()) {
+    return lead.nextAction.trim();
+  }
+
+  const reason = (lead.reason || "").toLowerCase();
+  const score = normalizeLegacyScore(lead);
+
+  if (score === "Contacted") {
+    return "Follow up in 3-5 days with a value-driven update.";
+  }
+
+  if (reason.includes("hiring") || reason.includes("growth")) {
+    return "Send intro message with a short growth-focused playbook.";
+  }
+
+  if (reason.includes("product hunt") || reason.includes("launched")) {
+    return "Congratulate the launch, then offer early-user acquisition ideas.";
+  }
+
+  if (lead.platform === "LinkedIn" || lead.platform === "Twitter/X") {
+    return "Engage with their latest post, then send a personalized DM.";
+  }
+
+  if (score === "Hot") {
+    return "Send intro message now and propose a quick 15-minute call.";
+  }
+
+  if (score === "Warm") {
+    return "Send a soft intro with one relevant case-study insight.";
+  }
+
+  return "Follow and observe activity before direct outreach.";
+};
+
 let leadsStore = seedLeads.map((lead) => ({
   ...lead,
   actionScore: normalizeLegacyScore(lead),
+  nextAction: buildNextAction(lead),
 }));
 
 const normalizeScore = (value) => {
@@ -38,6 +79,7 @@ const normalizeScore = (value) => {
 const cloneLead = (lead) => ({
   ...lead,
   actionScore: normalizeLegacyScore(lead),
+  nextAction: buildNextAction(lead),
 });
 
 const filterByKeyword = (keyword) => {
@@ -144,6 +186,7 @@ app.patch("/api/leads/:id", (req, res) => {
     actionScore: actionScore
       ? normalizeScore(actionScore)
       : normalizeLegacyScore(leadsStore[leadIndex]),
+    nextAction: buildNextAction(leadsStore[leadIndex]),
   };
 
   leadsStore[leadIndex] = updatedLead;

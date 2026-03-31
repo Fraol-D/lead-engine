@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchLeads } from "../api/leadsApi";
+import AppHeader from "../components/AppHeader";
 import SummaryCards from "../components/SummaryCards";
 import LeadsTable from "../components/LeadsTable";
 import LeadDetailsModal from "../components/LeadDetailsModal";
@@ -65,31 +66,21 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-8 sm:px-8">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-orange-600">
-            Lead Engine
-          </p>
-          <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-            Lead Dashboard
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {keyword ? `Showing results for: ${keyword}` : "Showing all leads"}
-          </p>
-        </div>
-        <Link
-          to="/"
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-        >
-          New Search
-        </Link>
-      </header>
+    <main className="page-shell min-h-screen">
+      <AppHeader
+        title="Lead Dashboard"
+        subtitle={keyword ? `Showing results for: ${keyword}` : "Showing all leads"}
+        rightAction={
+          <Link to="/" className="btn-secondary">
+            New Search
+          </Link>
+        }
+      />
 
       <SummaryCards summary={summary} />
 
       <section className="mt-6">
-        {isLoading && <p className="text-slate-600">Loading leads...</p>}
+        {isLoading && <p className="text-[#6f6863]">Loading leads...</p>}
         {error && <p className="text-red-700">{error}</p>}
         {!isLoading && !error && (
           <LeadsTable leads={leads} onSelectLead={setSelectedLead} />
