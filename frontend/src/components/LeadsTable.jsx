@@ -32,7 +32,9 @@ export default function LeadsTable({ leads, onSelectLead }) {
               <tr key={lead.id}>
                 <td>
                   <div className="flex flex-col">
-                    <span className="font-medium text-[#242322]">{lead.name}</span>
+                    <span className="font-medium text-[#242322]">
+                      {lead.name}
+                    </span>
                     <span className="text-xs text-[#706b67] font-normal">
                       {lead.niche}
                     </span>
@@ -41,17 +43,19 @@ export default function LeadsTable({ leads, onSelectLead }) {
                 <td className="text-[#57524f]">{lead.platform}</td>
                 <td className="text-[#3e3a37]">{lead.reason}</td>
                 <td>
-                  <span className={`score-pill ${
-                    normalizeActionScore(lead) === "Hot"
-                      ? "score-hot"
-                      : normalizeActionScore(lead) === "Warm"
-                        ? "score-warm"
-                        : normalizeActionScore(lead) === "Contacted"
-                          ? "score-contacted"
-                          : normalizeActionScore(lead) === "Hold"
-                            ? "score-hold"
-                            : "score-cold"
-                  }`}>
+                  <span
+                    className={`score-pill ${
+                      normalizeActionScore(lead) === "Hot"
+                        ? "score-hot"
+                        : normalizeActionScore(lead) === "Warm"
+                          ? "score-warm"
+                          : normalizeActionScore(lead) === "Contacted"
+                            ? "score-contacted"
+                            : normalizeActionScore(lead) === "Hold"
+                              ? "score-hold"
+                              : "score-cold"
+                    }`}
+                  >
                     {normalizeActionScore(lead)}
                   </span>
                 </td>

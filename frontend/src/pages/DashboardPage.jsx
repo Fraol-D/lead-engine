@@ -69,7 +69,9 @@ export default function DashboardPage() {
     <main className="page-shell min-h-screen">
       <AppHeader
         title="Lead Dashboard"
-        subtitle={keyword ? `Showing results for: ${keyword}` : "Showing all leads"}
+        subtitle={
+          keyword ? `Showing results for: ${keyword}` : "Showing all leads"
+        }
         rightAction={
           <Link to="/" className="btn-secondary">
             New Search

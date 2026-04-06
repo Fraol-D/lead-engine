@@ -128,10 +128,7 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
               {lead.link}
             </a>
           </div>
-          <button
-            onClick={onClose}
-            className="btn-secondary"
-          >
+          <button onClick={onClose} className="btn-secondary">
             Close
           </button>
         </div>
@@ -139,16 +136,17 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
         <div className="mt-4 grid gap-4 text-sm text-[#3c3936]">
           <div className="modal-grid">
             <div className="ghost-block">
-              <span className="label-micro">
-                The Reason
-              </span>
+              <span className="label-micro">The Reason</span>
               <p className="value-copy">{lead.reason}</p>
             </div>
             <div className="ghost-block bg-[#efe9e4]">
               <span className="label-micro text-[#77584f]">
                 Recommended Action
               </span>
-              <p className="value-copy">{lead.nextAction || "Follow and observe activity, then send a concise intro."}</p>
+              <p className="value-copy">
+                {lead.nextAction ||
+                  "Follow and observe activity, then send a concise intro."}
+              </p>
             </div>
           </div>
 
@@ -169,9 +167,7 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
           </div>
 
           <label className="grid gap-2">
-            <span className="label-micro">
-              Notes & Context
-            </span>
+            <span className="label-micro">Notes & Context</span>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
@@ -189,10 +185,7 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
             >
               {isSaving ? "Saving..." : "Save Notes"}
             </button>
-            <button
-              onClick={markAsContacted}
-              className="btn-secondary"
-            >
+            <button onClick={markAsContacted} className="btn-secondary">
               Mark as Contacted
             </button>
           </div>
@@ -212,10 +205,7 @@ export default function LeadDetailsModal({ lead, onClose, onLeadUpdated }) {
                     : "Generate Message"}
               </button>
               {message && (
-                <button
-                  onClick={handleCopy}
-                  className="btn-secondary"
-                >
+                <button onClick={handleCopy} className="btn-secondary">
                   {copyState === "copied" ? "Copied" : "Copy Message"}
                 </button>
               )}
